@@ -9,3 +9,9 @@ export type Product = {
   discount_rate: number; // 0 ~ 100
   created_at: string;
 };
+
+// 화면에서 사용하기 좋은 형태의 타입
+// 계산된 값(salePrice)을 포함
+export type ProductView = Product & {
+  salePrice: number;
+};
