@@ -14,6 +14,8 @@ export function ProductCard({ product }: Props) {
           src={product.image_path}
           alt={product.name}
           fill
+          loading="lazy"
+          sizes="(max-width: 768px) 100vw, 33vw"
           className="object-cover"
         />
       </div>
