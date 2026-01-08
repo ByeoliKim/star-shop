@@ -1,7 +1,7 @@
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { Product, ProductView } from "@/lib/types/product";
 import { calcSalePrice } from "@/lib/utils/pricing";
-import { ProductGrid } from "@/components/products/ProductGrid";
+import { ProductsInfiniteSection } from "@/components/products/ProductsInfiniteSection";
 
 /**
  * 홈 페이지
@@ -17,21 +17,22 @@ export default async function HomePage() {
     .from("products")
     .select("*")
     .order("created_at", { ascending: false })
-    .limit(12);
+    .limit(10);
 
   if (error) {
     throw new Error(error.message);
   }
 
   // DB -> 화면용 데이터로 변환
-  const products: ProductView[] = (data as Product[]).map((product) => ({
+  const initialItems: ProductView[] = (data as Product[]).map((product) => ({
     ...product,
     salePrice: calcSalePrice(product.original_price, product.discount_rate),
   }));
   return (
-    <main className="p-6">
+    <main className="max-w-7xl mx-auto p-6">
       <h2 className="mb-6 text-2xl font-bold">상품 리스트</h2>
-      <ProductGrid products={products} />
+      {/* 클라이언트 영역: 여기서부터 React Query 가 이어받음 */}
+      <ProductsInfiniteSection initialItems={initialItems} />
     </main>
   );
 }
