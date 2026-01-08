@@ -1,6 +1,7 @@
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { Product, ProductView } from "@/lib/types/product";
 import { calcSalePrice } from "@/lib/utils/pricing";
+import { ProductGrid } from "@/components/products/ProductGrid";
 
 /**
  * 홈 페이지
@@ -9,7 +10,7 @@ import { calcSalePrice } from "@/lib/utils/pricing";
  */
 
 export default async function HomePage() {
-  const supabase = createSupabaseServerClient();
+  const supabase = await createSupabaseServerClient();
 
   // 서버에서 직접 DB 조회
   const { data, error } = await supabase
