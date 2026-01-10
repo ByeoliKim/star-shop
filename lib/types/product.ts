@@ -8,6 +8,7 @@ export type Product = {
   original_price: number;
   discount_rate: number; // 0 ~ 100
   created_at: string;
+  champion_key: string;
 };
 
 // 화면에서 사용하기 좋은 형태의 타입
