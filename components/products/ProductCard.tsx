@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { ProductView } from "@/lib/types/product";
 import { Price } from "@/components/ui/Price";
 
@@ -8,7 +9,11 @@ type Props = {
 
 export function ProductCard({ product }: Props) {
   return (
-    <div className="rounded-lg border p-4">
+    <Link
+      href={`/products/${product.id}`}
+      aria-label={`${product.name} 상세 보기`}
+      className="block rounded-lg border p-4 transition hover:bg-zinc-50"
+    >
       <div className="relative mb-3 aspect-square">
         <Image
           src={product.image_path}
@@ -25,6 +30,6 @@ export function ProductCard({ product }: Props) {
         salePrice={product.salePrice}
         discountRate={product.discount_rate}
       />
-    </div>
+    </Link>
   );
 }
