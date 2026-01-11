@@ -15,6 +15,9 @@ export async function GET(req: Request) {
   const page = Number(searchParams.get("page") ?? "1");
   const limit = Number(searchParams.get("limit") ?? "10");
 
+  // category 파라미터 받기
+  const category = searchParams.get("category");
+
   // 방어 코드 : 이상한 값이 오면 기본값으로 보정
   const safePage = Number.isFinite(page) && page > 0 ? page : 1;
   const safeLimit =
@@ -28,11 +31,30 @@ export async function GET(req: Request) {
 
   const supabase = await createSupabaseServerClient();
 
-  const { data, error } = await supabase
+  // const { data, error } = await supabase
+  //   .from("products")
+  //   .select("*")
+  //   .order("created_at", { ascending: false })
+  //   .range(from, to);
+
+  // 기본 쿼리
+  let query = supabase
     .from("products")
     .select("*")
     .order("created_at", { ascending: false })
     .range(from, to);
+
+  /**
+   * all 이 아니면 서버에서 필터링
+   * React Query 가 page=1 을 다시 가져와도
+   * category 가 유지된 결과로 캐시가 갱신되어 덮어쓰기가 사라짐
+   */
+
+  if (category && category !== "all") {
+    query = query.eq("category", category);
+  }
+
+  const { data, error } = await query;
 
   if (error) {
     return NextResponse.json(

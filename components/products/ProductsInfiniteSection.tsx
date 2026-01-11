@@ -7,8 +7,10 @@ import { calcSalePrice } from "@/lib/utils/pricing";
 import { ProductGrid } from "./ProductGrid";
 import { useIntersectionObserver } from "@/lib/hooks/useIntersectionObserver";
 
+type Category = "all" | "champion" | "skin" | "icon" | "emote";
 type Props = {
   initialItems: ProductView[];
+  category: Category;
 };
 
 /**
@@ -17,9 +19,10 @@ type Props = {
  * 이후 fetchNextPage() 가 2페이지부터 가져옴
  */
 
-export function ProductsInfiniteSection({ initialItems }: Props) {
+export function ProductsInfiniteSection({ initialItems, category }: Props) {
   const query = useInfiniteQuery({
-    queryKey: ["products", "latest", 10], // 최신순 + limit=10 고정
+    queryKey: ["products", "latest", category, 10], // 최신순, category, limit=10
+    staleTime: 1000 * 30,
     initialPageParam: 1, // SSR 1페이지 데이터를 첫 페이지로 넣어줌
     initialData: {
       pages: [
@@ -34,7 +37,14 @@ export function ProductsInfiniteSection({ initialItems }: Props) {
       pageParams: [1],
     },
     queryFn: async ({ pageParam }) => {
-      const res = await fetch(`/api/products?page=${pageParam}&limit=10`);
+      const qs = new URLSearchParams({
+        page: String(pageParam),
+        limit: "10",
+      });
+      // all 이 아니면 category 도 같이 보냄
+      if (category !== "all") qs.set("category", category);
+      // const res = await fetch(`/api/products?page=${qs}&limit=10`);
+      const res = await fetch(`/api/products?${qs.toString()}`);
       const json = await res.json();
 
       if (!res.ok || !json.ok) {
