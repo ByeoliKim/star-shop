@@ -3,6 +3,7 @@ import { Product, ProductView } from "@/lib/types/product";
 import { calcSalePrice } from "@/lib/utils/pricing";
 import { ProductsInfiniteSection } from "@/components/products/ProductsInfiniteSection";
 import { Header } from "@/components/layout/Header";
+import { ScrollToTopOnCategoryChange } from "@/components/layout/ScrollToTopOnCategoryChange";
 
 /**
  * 홈 페이지
@@ -58,6 +59,7 @@ export default async function HomePage({
   return (
     <>
       <Header activeCategory={activeCategory} />
+      <ScrollToTopOnCategoryChange />
       {/* 디버그: 지금 url 로 어떤 category 가 들어왔는지 확인 */}
       <div className="mb-4 rounded border p-3 text-sm">
         debug category: <b>{sp.category ?? "(없음)"}</b>
