@@ -5,7 +5,7 @@ export type CartItem = {
   name: string;
   image_path: string;
   original_price: number;
-  discounted_price: number;
+  discount_rate: number;
   salePrice: number;
 };
 
