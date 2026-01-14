@@ -29,11 +29,30 @@ type CartState = {
   selectAll: () => void;
   clearSelection: () => void;
   removeSelected: () => void;
+
+  /**
+   * 보유 중 (구매 완료) 상품 id 목록
+   * - 보유 중이면 다시 구매 불가 < 규칙을 위해 필요함
+   * - 나중에 auth 붙으면 서버 데이터로 대체할 거임
+   */
+  ownedIds: string[];
+
+  /**
+   * 보유 중 목록에 여러 id 를 추가
+   * - 중복 추가를 막기 위해 Set 으로 정규화 함
+   */
+  addOwned: (ids: string[]) => void;
+
+  /**
+   * 특정 상품이 보유 중인지 확인
+   */
+  isOwned: (id: string) => boolean;
 };
 
 export const useCartStore = create<CartState>((set, get) => ({
   itemsById: {},
   selectedIds: [],
+  ownedIds: [],
 
   addItem: (item) => {
     /**
@@ -124,4 +143,13 @@ export const useCartStore = create<CartState>((set, get) => ({
         selectedIds: [],
       };
     }),
+  addOwned: (ids) =>
+    set((state) => ({
+      ...state,
+      // 중복 제거 : 기존 ownedIds + 새 ids 를 합친 뒤 Set 으로 정리
+      ownedIds: Array.from(new Set([...state.ownedIds, ...ids])),
+    })),
+  isOwned: (id) => {
+    return get().ownedIds.includes(id);
+  },
 }));
