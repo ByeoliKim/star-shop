@@ -13,6 +13,10 @@ export function ProductCard({ product }: Props) {
   // 장바구니 담기 액션
   const addItem = useCartStore((s) => s.addItem);
 
+  // 이미 담김
+  const itemsById = useCartStore((s) => s.itemsById);
+  const isInCart = !!itemsById[product.id];
+
   return (
     <div className="rounded-lg border p-4">
       <Link

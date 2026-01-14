@@ -22,7 +22,7 @@ type CartState = {
   selectedIds: string[];
 
   // actions ------------------------------------------------------------
-  addItem: (item: CartItem) => void;
+  addItem: (item: CartItem) => boolean;
   removeItem: (id: string) => void;
   clear: () => void;
   toggleSelect: (id: string) => void;
@@ -38,17 +38,19 @@ export const useCartStore = create<CartState>((set, get) => ({
    * 담기
    * - 이미 있으면 아무것도 하지 않음 (중복 담기 금지)
    */
-  addItem: (item) =>
-    set((state) => {
-      if (state.itemsById[item.id]) return state;
-      return {
-        ...state,
-        itemsById: {
-          ...state.itemsById,
-          [item.id]: item,
-        },
-      };
-    }),
+  addItem: (item) => {
+    const exists = !!get().itemsById[item.id];
+    if (exists) return false;
+
+    set((state) => ({
+      ...state,
+      itemsById: {
+        ...state.itemsById,
+        [item.id]: item,
+      },
+    }));
+    return true;
+  }
 
   /**
    * 단일 삭제
