@@ -65,7 +65,11 @@ export default function CartPage() {
             <button
               type="button"
               className="rounded-md border px-3 py-2 text-sm"
-              onClick={removeSelected}
+              onClick={() => {
+                const ok = confirm("선택한 상품을 장바구니에서 빼시겠습니까?");
+                if (!ok) return;
+                removeSelected();
+              }}
               disabled={selectedIds.length === 0}
             >
               선택 삭제
@@ -73,7 +77,11 @@ export default function CartPage() {
             <button
               type="button"
               className="rounded-md border px-3 py-2 text-sm"
-              onClick={clear}
+              onClick={() => {
+                const ok = confirm("전체 상품을 장바구니에서 빼시겠습니까?");
+                if (!ok) return;
+                clear();
+              }}
               disabled={items.length === 0}
             >
               전체 삭제
@@ -135,7 +143,13 @@ export default function CartPage() {
                     <button
                       type="button"
                       className="rounded-md border px-3 py-2 text-sm"
-                      onClick={() => removeItem(item.id)}
+                      onClick={() => {
+                        const ok = confirm(
+                          "해당 상품을 장바구니에서 빼시겠습니까?"
+                        );
+                        if (!ok) return;
+                        removeItem(item.id);
+                      }}
                     >
                       삭제
                     </button>
