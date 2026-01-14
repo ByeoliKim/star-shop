@@ -34,11 +34,13 @@ type CartState = {
 export const useCartStore = create<CartState>((set, get) => ({
   itemsById: {},
   selectedIds: [],
-  /**
-   * 담기
-   * - 이미 있으면 아무것도 하지 않음 (중복 담기 금지)
-   */
+
   addItem: (item) => {
+    /**
+     * store 가 "추가 성공/실패" 를 판단해서 boolean 으로 반환한다
+     * true : 새로 장바구니에 추가됨
+     * false : 이미 담겨져 있어서 추가하지 않음 (중복 담기 방지)
+     */
     const exists = !!get().itemsById[item.id];
     if (exists) return false;
 
@@ -50,7 +52,7 @@ export const useCartStore = create<CartState>((set, get) => ({
       },
     }));
     return true;
-  }
+  },
 
   /**
    * 단일 삭제

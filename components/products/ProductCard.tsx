@@ -44,14 +44,21 @@ export function ProductCard({ product }: Props) {
       {/* 장바구니 담기 버튼 */}
       <button
         type="button"
-        className="mt-3 w-full rounded-md bg-zinc-900 px-3 py-2 text-sm text-white hover:bg-zinc-800"
+        disabled={isInCart}
+        className={[
+          "mt-3 w-full rounded-md px-3 py-2 text-sm text-white",
+          isInCart
+            ? "bg-zinc-400 cursor-not-allowed"
+            : "bg-zinc-900 hover:bg-zinc-800",
+        ].join(" ")}
         onClick={(e) => {
           /**
            * 중요포인트
            * - 이 버튼은 Link 밖에 있으니 원래는 페이지 이동과 무관함
            */
           e.preventDefault();
-          addItem({
+
+          const added = addItem({
             id: product.id,
             name: product.name,
             image_path: product.image_path,
@@ -59,9 +66,11 @@ export function ProductCard({ product }: Props) {
             discount_rate: product.discount_rate,
             salePrice: product.salePrice,
           });
+          if (added) alert("장바구니에 담겼습니다.");
+          else alert("이미 장바구니에 담긴 상품입니다.");
         }}
       >
-        장바구니 담기
+        {isInCart ? "이미 담김" : "장바구니 담기"}
       </button>
     </div>
   );
