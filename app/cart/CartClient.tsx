@@ -2,7 +2,9 @@
 
 import Image from "next/image";
 import { useMemo } from "react";
+import { useRouter } from "next/navigation";
 import { useCartStore } from "@/store/cart.store";
+import { getClientUser } from "@/lib/auth/client";
 
 /**
  * 장바구니 UI 페이지 (Client Component)
@@ -11,6 +13,8 @@ import { useCartStore } from "@/store/cart.store";
  */
 
 export default function CartClient() {
+  const router = useRouter();
+
   const itemsById = useCartStore((s) => s.itemsById);
   const selectedIds = useCartStore((s) => s.selectedIds);
 
@@ -182,7 +186,13 @@ export default function CartClient() {
             type="button"
             className="w-full rounded-md bg-zinc-900 px-3 py-2 text-sm text-white disabled:cursor-not-allowed disabled:bg-zinc-300"
             disabled={selectedIds.length === 0}
-            onClick={() => {
+            onClick={async () => {
+              const user = await getClientUser();
+              if (!user) {
+                alert("로그인이 필요합니다.");
+                router.push("/login");
+                return;
+              }
               // 1. 선택됨 상품들을 보유중으로 전환함
               addOwned(selectedIds);
               // 2. 장바구니에서 제거

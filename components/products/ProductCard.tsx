@@ -4,12 +4,16 @@ import Link from "next/link";
 import { ProductView } from "@/lib/types/product";
 import { Price } from "@/components/ui/Price";
 import { useCartStore } from "@/store/cart.store";
+import { useRouter } from "next/navigation";
+import { getClientUser } from "@/lib/auth/client";
 
 type Props = {
   product: ProductView;
 };
 
 export function ProductCard({ product }: Props) {
+  const router = useRouter();
+
   // 장바구니 담기 액션
   const addItem = useCartStore((s) => s.addItem);
 
@@ -56,14 +60,18 @@ export function ProductCard({ product }: Props) {
             ? "bg-zinc-400 cursor-not-allowed"
             : "bg-zinc-900 hover:bg-zinc-800",
         ].join(" ")}
-        onClick={(e) => {
-          /**
-           * 중요포인트
-           * - 이 버튼은 Link 밖에 있으니 원래는 페이지 이동과 무관함
-           */
+        onClick={async (e) => {
           e.preventDefault();
 
           if (owned) return;
+
+          // 로그인 가드 (클라이언트에서 확인)
+          const user = await getClientUser();
+          if (!user) {
+            alert("로그인이 필요합니다.");
+            router.push("/login");
+            return;
+          }
 
           const added = addItem({
             id: product.id,
