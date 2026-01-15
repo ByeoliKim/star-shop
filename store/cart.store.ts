@@ -52,7 +52,7 @@ type CartState = {
 export const useCartStore = create<CartState>((set, get) => ({
   itemsById: {},
   selectedIds: [],
-  ownedIds: [],
+  ownedIds: ["a8344281-461a-461f-bb31-e30ec3ab4af0"],
 
   addItem: (item) => {
     /**

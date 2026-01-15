@@ -17,6 +17,11 @@ export function ProductCard({ product }: Props) {
   const itemsById = useCartStore((s) => s.itemsById);
   const isInCart = !!itemsById[product.id];
 
+  // 보유중
+  const isOwned = useCartStore((s) => s.isOwned);
+  const owned = isOwned(product.id);
+  const disabled = isInCart || owned;
+
   return (
     <div className="rounded-lg border p-4">
       <Link
@@ -44,10 +49,10 @@ export function ProductCard({ product }: Props) {
       {/* 장바구니 담기 버튼 */}
       <button
         type="button"
-        disabled={isInCart}
+        disabled={disabled}
         className={[
           "mt-3 w-full rounded-md px-3 py-2 text-sm text-white",
-          isInCart
+          disabled
             ? "bg-zinc-400 cursor-not-allowed"
             : "bg-zinc-900 hover:bg-zinc-800",
         ].join(" ")}
@@ -57,6 +62,8 @@ export function ProductCard({ product }: Props) {
            * - 이 버튼은 Link 밖에 있으니 원래는 페이지 이동과 무관함
            */
           e.preventDefault();
+
+          if (owned) return;
 
           const added = addItem({
             id: product.id,
@@ -70,7 +77,7 @@ export function ProductCard({ product }: Props) {
           else alert("이미 장바구니에 담긴 상품입니다.");
         }}
       >
-        {isInCart ? "이미 담김" : "장바구니 담기"}
+        {owned ? "보유중" : isInCart ? "이미 담김" : "장바구니 담기"}
       </button>
     </div>
   );

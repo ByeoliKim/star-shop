@@ -22,6 +22,8 @@ export default function CartPage() {
   const removeItem = useCartStore((s) => s.removeItem);
   const clear = useCartStore((s) => s.clear);
 
+  const addOwned = useCartStore((s) => s.addOwned);
+
   // Record -> 배열로 변환 (렌더링용)
   const items = useMemo(() => Object.values(itemsById), [itemsById]);
 
@@ -181,7 +183,12 @@ export default function CartPage() {
             className="w-full rounded-md bg-zinc-900 px-3 py-2 text-sm text-white disabled:cursor-not-allowed disabled:bg-zinc-300"
             disabled={selectedIds.length === 0}
             onClick={() => {
-              alert("결제 기능 아직임");
+              // 1. 선택됨 상품들을 보유중으로 전환함
+              addOwned(selectedIds);
+              // 2. 장바구니에서 제거
+              removeSelected();
+              // 3. UX 안내 (임시!)
+              alert("구매가 완료되었습니다. (임시 처리임돠.)");
             }}
           >
             결제하기
