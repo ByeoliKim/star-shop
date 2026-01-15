@@ -38,9 +38,14 @@ export async function Header() {
           {user ? (
             <LogoutButton />
           ) : (
-            <Link className="hover:underline" href="/login">
-              로그인
-            </Link>
+            <>
+              <Link className="hover:underline" href="/login">
+                로그인
+              </Link>
+              <Link className="hover:underline" href="/signup">
+                회원가입
+              </Link>
+            </>
           )}
         </div>
       </div>
