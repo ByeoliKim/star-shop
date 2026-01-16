@@ -3,16 +3,6 @@
 미니 이커머스 프로젝트입니다.<br/>
 계속 작업 중입니다. 💪🏻😊✨<br/>중간 정리겸 리드미 업데이트 했습니당.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
-
 ## 🎯 목표
 
 - **SSR 기반의 상품 리스트 1페이지 렌더링** (서버에서 DB 조회 후 HTML 생성)
