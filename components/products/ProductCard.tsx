@@ -64,6 +64,7 @@ export function ProductCard({ product }: Props) {
           e.preventDefault();
 
           if (owned) return;
+          if (isInCart) return;
 
           // 로그인 가드 (클라이언트에서 확인)
           const user = await getClientUser();

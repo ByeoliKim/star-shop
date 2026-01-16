@@ -47,12 +47,27 @@ type CartState = {
    * 특정 상품이 보유 중인지 확인
    */
   isOwned: (id: string) => boolean;
+
+  /**
+   * 임시 보유 캐시
+   * - 지금은 클라이언트 상태로만 관리함
+   * - 다음에 DB(user_profiles) 로 승격할 예정
+   */
+  cash: number;
+
+  /**
+   * 결제 시 캐시를 차감함
+   * - 성공 : true (cash 감소)
+   * - 실패(부족) : false (변화 없음)
+   */
+  spendCash: (amount: number) => boolean;
 };
 
 export const useCartStore = create<CartState>((set, get) => ({
   itemsById: {},
   selectedIds: [],
-  ownedIds: ["a8344281-461a-461f-bb31-e30ec3ab4af0"],
+  ownedIds: [],
+  cash: 10_000,
 
   addItem: (item) => {
     /**
@@ -151,5 +166,22 @@ export const useCartStore = create<CartState>((set, get) => ({
     })),
   isOwned: (id) => {
     return get().ownedIds.includes(id);
+  },
+  spendCash: (amount) => {
+    /**
+     * 결제는 상태 변경이므로 store 에서 원칙을 보장함
+     * - amount 가 이상하면 실패 처리
+     * - cash 부족하면 실패 처리
+     */
+    if (!Number.isFinite(amount) || amount <= 0) return false;
+    const currentCash = get().cash;
+    if (currentCash < amount) return false;
+
+    set((state) => ({
+      ...state,
+      cash: state.cash - amount,
+    }));
+
+    return true;
   },
 }));

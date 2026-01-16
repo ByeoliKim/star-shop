@@ -45,7 +45,18 @@ export default function CartClient() {
   }, [selectedIds, itemsById]);
 
   // 임시 캐시 : 나중에 auth 붙이면 user_profiles 에서 가져오게 될 값임
-  const currentCash = 10_000;
+  // const currentCash = 10_000;
+
+  const cash = useCartStore((s) => s.cash);
+  const spendCash = useCartStore((s) => s.spendCash);
+
+  /**
+   * 결제 가능 여부
+   * - 선택된 상품이 있고
+   * - 보유 캐시가 선택 합계 이상일 때만 true
+   */
+
+  const canCheckout = selectedIds.length > 0 && cash >= selectedTotal;
 
   return (
     <main className="max-w-7xl mx-auto p-6 space-y-6">
@@ -174,37 +185,48 @@ export default function CartClient() {
               <b>{selectedTotal.toLocaleString()} 원</b>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-zinc-600">보유 캐시 (임시)</span>
-              <b>{currentCash.toLocaleString()} 원</b>
+              <span className="text-zinc-600">보유 캐시</span>
+              <b>{cash.toLocaleString()} 원</b>
             </div>
             <div className="pt-2 border-t flex items-center justify-between">
-              <span className="text-zinc-600">결제 후 잔액 (임시)</span>
-              <b>{(currentCash - selectedTotal).toLocaleString()} 원</b>
+              <span className="text-zinc-600">결제 후 잔액</span>
+              <b>{(cash - selectedTotal).toLocaleString()} 원</b>
             </div>
           </div>
           <button
             type="button"
             className="w-full rounded-md bg-zinc-900 px-3 py-2 text-sm text-white disabled:cursor-not-allowed disabled:bg-zinc-300"
-            disabled={selectedIds.length === 0}
+            disabled={!canCheckout}
             onClick={async () => {
+              const ok = confirm("선택한 상품을 결제하시겠습니까?");
+              if (!ok) return;
               const user = await getClientUser();
               if (!user) {
                 alert("로그인이 필요합니다.");
                 router.push("/login");
                 return;
               }
-              // 1. 선택됨 상품들을 보유중으로 전환함
+
+              // 1. 캐시 부족하면 결제 실패
+              const success = spendCash(selectedTotal);
+              if (!success) {
+                alert("보유 캐시가 부족합니다.");
+                return;
+              }
+
+              // 2. 결제 성공하면 보유중 처리 + 장바구니에서 제거
               addOwned(selectedIds);
-              // 2. 장바구니에서 제거
               removeSelected();
-              // 3. UX 안내 (임시!)
-              alert("구매가 완료되었습니다. (임시 처리임돠.)");
+
+              alert("구매가 완료되었습니다!");
             }}
           >
             결제하기
           </button>
           {selectedIds.length === 0 ? (
             <p className="text-xs text-zinc-500">결제할 상품을 선택해 주세요</p>
+          ) : cash < selectedTotal ? (
+            <p className="text-xs text-red-500">보유 캐시가 부족합니다.</p>
           ) : null}
         </aside>
       </div>
