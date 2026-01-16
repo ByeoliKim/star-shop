@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import { useSearchParams } from "next/navigation";
 
 /**
  * 로그인 페이지
@@ -14,6 +15,8 @@ import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 export default function LoginPage() {
   const router = useRouter();
   const supabase = createSupabaseBrowserClient();
+  const searchParams = useSearchParams();
+  const next = searchParams.get("next");
 
   // 입력값 상태
   const [email, setEmail] = useState("");
@@ -49,8 +52,12 @@ export default function LoginPage() {
     // 로그인 성공
     alert("로그인 성공");
 
-    // 1. 로그인 후 이동할 페이지 (임시)
-    router.push("/products/category/champion");
+    // 1. 로그인 후 이동할 페이지
+    // router.push("/products/category/champion");
+    const target =
+      next && next.startsWith("/") ? next : "/products/category/champion";
+
+    router.replace(target);
 
     // 2. 그 다음 서버 컴포넌트에서 재평가
     setTimeout(() => {
