@@ -61,6 +61,13 @@ type CartState = {
    * - 실패(부족) : false (변화 없음)
    */
   spendCash: (amount: number) => boolean;
+
+  /**
+   * DB 에서 읽어온 값으로 cart 상태를 초기화한다
+   */
+  initFromServer: (params: { cash: number; ownedIds: string[] }) => void;
+
+  setCash: (cash: number) => void;
 };
 
 export const useCartStore = create<CartState>((set, get) => ({
@@ -183,5 +190,16 @@ export const useCartStore = create<CartState>((set, get) => ({
     }));
 
     return true;
+  },
+  initFromServer: ({ cash, ownedIds }) => {
+    set((state) => ({
+      ...state,
+      cash,
+      ownedIds,
+    }));
+  },
+  setCash: (cash) => {
+    if (!Number.isFinite(cash) || cash < 0) return;
+    set((state) => ({ ...state, cash }));
   },
 }));

@@ -4,6 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { useSearchParams } from "next/navigation";
+import { loadUserState } from "@/lib/user/loadUserState";
+import { useCartStore } from "@/store/cart.store";
 
 /**
  * 로그인 페이지
@@ -17,6 +19,7 @@ export default function LoginPage() {
   const supabase = createSupabaseBrowserClient();
   const searchParams = useSearchParams();
   const next = searchParams.get("next");
+  const initFromServer = useCartStore((s) => s.initFromServer);
 
   // 입력값 상태
   const [email, setEmail] = useState("");
@@ -51,6 +54,17 @@ export default function LoginPage() {
 
     // 로그인 성공
     alert("로그인 성공");
+
+    try {
+      const state = await loadUserState();
+      if (state) {
+        initFromServer(state);
+      }
+    } catch (e) {
+      // [object Object] 대신 에러메시지 출력
+      const message = e instanceof Error ? e.message : "유저 상태 로딩 실패";
+      alert(message);
+    }
 
     // 1. 로그인 후 이동할 페이지
     // router.push("/products/category/champion");

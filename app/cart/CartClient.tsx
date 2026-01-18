@@ -5,6 +5,7 @@ import { useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useCartStore } from "@/store/cart.store";
 import { getClientUser } from "@/lib/auth/client";
+import { checkoutSelected } from "@/lib/checkout/checkoutSelected";
 
 /**
  * 장바구니 UI 페이지 (Client Component)
@@ -49,6 +50,8 @@ export default function CartClient() {
 
   const cash = useCartStore((s) => s.cash);
   const spendCash = useCartStore((s) => s.spendCash);
+
+  const setCash = useCartStore((s) => s.setCash);
 
   /**
    * 결제 가능 여부
@@ -162,7 +165,7 @@ export default function CartClient() {
                       className="rounded-md border px-3 py-2 text-sm"
                       onClick={() => {
                         const ok = confirm(
-                          "해당 상품을 장바구니에서 빼시겠습니까?"
+                          "해당 상품을 장바구니에서 빼시겠습니까?",
                         );
                         if (!ok) return;
                         removeItem(item.id);
@@ -200,23 +203,41 @@ export default function CartClient() {
             onClick={async () => {
               const ok = confirm("선택한 상품을 결제하시겠습니까?");
               if (!ok) return;
-              const user = await getClientUser();
-              if (!user) {
-                alert("로그인이 필요합니다.");
-                router.push("/login");
-                return;
-              }
+              // const user = await getClientUser();
+              // if (!user) {
+              //   alert("로그인이 필요합니다.");
+              //   router.push("/login");
+              //   return;
+              // }
 
               // 1. 캐시 부족하면 결제 실패
-              const success = spendCash(selectedTotal);
-              if (!success) {
-                alert("보유 캐시가 부족합니다.");
+              // const success = spendCash(selectedTotal);
+              // if (!success) {
+              //   alert("보유 캐시가 부족합니다.");
+              //   return;
+              // }
+
+              // DB 결제 먼저
+              const result = await checkoutSelected({
+                productIds: selectedIds,
+                totalPrice: selectedTotal,
+              });
+
+              if (!result.ok) {
+                alert(result.message);
+
                 return;
               }
 
               // 2. 결제 성공하면 보유중 처리 + 장바구니에서 제거
+              /**
+               * 화면 상태 동기화
+               * - DB 에서 결제가 성공했음
+               * - store 도 같은 결과가 되도록 반영한다
+               */
               addOwned(selectedIds);
               removeSelected();
+              setCash(result.newCash);
 
               alert("구매가 완료되었습니다!");
             }}

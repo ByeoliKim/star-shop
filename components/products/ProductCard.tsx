@@ -23,7 +23,11 @@ export function ProductCard({ product }: Props) {
 
   // 보유중
   const isOwned = useCartStore((s) => s.isOwned);
-  const owned = isOwned(product.id);
+  /**
+   * owned 여부는 값 자체를 구독해야 리렌더가 안정적임
+   * - 함수(isOwned) 만 구독하면 상태 변경이 있어도 리렌더가 안 일어나는 케이스가 생길 수 있음
+   */
+  const owned = useCartStore((s) => s.ownedIds.includes(product.id));
   const disabled = isInCart || owned;
 
   return (
