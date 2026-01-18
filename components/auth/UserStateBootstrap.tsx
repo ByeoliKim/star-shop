@@ -14,32 +14,28 @@ import { loadUserState } from "@/lib/user/loadUserState";
 
 export function UserStateBootstrap() {
   const initFromServer = useCartStore((s) => s.initFromServer);
+  const setHydrated = useCartStore((s) => s.setHydrated);
 
   // 초기화 완료 여부를 관리
   const [done, setDone] = useState(false);
 
   useEffect(() => {
-    let cancelled = false;
     async function run() {
       try {
         const state = await loadUserState();
-        if (!state) {
-          // 비로그인이면 아무것도 주입하지 않음
-          if (!cancelled) setDone(true);
-          return;
+        if (state) {
+          initFromServer(state); // hydrated true 처리됨
+        } else {
+          // 비로그인도 로딩은 끝이므로 hydrated true
+          setHydrated(true);
         }
-        // 로그인 상태면 DB 값을 store 에 주입함
-        initFromServer(state);
-        if (!cancelled) setDone(true);
       } catch {
-        if (!cancelled) setDone(true);
+        // 실패해도 앱이 멈추지 않게 하고, 로딩은 끝처리
+        setHydrated(true);
       }
     }
     run();
-    return () => {
-      cancelled = true;
-    };
-  }, [initFromServer]);
+  });
 
   // ui 를 렌더링할 필요는 없음
   // done 을 활용해 '로딩' 표시를 하고 싶으면 다음 턴에 확장 가능

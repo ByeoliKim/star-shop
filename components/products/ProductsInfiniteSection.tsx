@@ -6,6 +6,7 @@ import { Product, ProductView } from "@/lib/types/product";
 import { calcSalePrice } from "@/lib/utils/pricing";
 import { ProductGrid } from "./ProductGrid";
 import { useIntersectionObserver } from "@/lib/hooks/useIntersectionObserver";
+import { useCartStore } from "@/store/cart.store";
 
 type Category = "all" | "champion" | "skin" | "icon" | "emote";
 type Props = {
@@ -93,6 +94,12 @@ export function ProductsInfiniteSection({ initialItems, category }: Props) {
     rootMargin: "200px", // 바닥에 닿기 200px 전에 미리 로드
     threshold: 0,
   });
+
+  const hydrated = useCartStore((s) => s.hydrated);
+
+  // if (!hydrated) {
+  //   return <div className="rounded-2xl border p-4 text-sm">불러오는 중...</div>;
+  // }
 
   return (
     <section className="space-y-4">

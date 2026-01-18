@@ -30,6 +30,8 @@ export function ProductCard({ product }: Props) {
   const owned = useCartStore((s) => s.ownedIds.includes(product.id));
   const disabled = isInCart || owned;
 
+  const hydrated = useCartStore((s) => s.hydrated);
+
   return (
     <div className="rounded-lg border p-4">
       <Link
@@ -57,7 +59,7 @@ export function ProductCard({ product }: Props) {
       {/* 장바구니 담기 버튼 */}
       <button
         type="button"
-        disabled={disabled}
+        disabled={!hydrated || isInCart || owned}
         className={[
           "mt-3 w-full rounded-md px-3 py-2 text-sm text-white",
           disabled
@@ -65,6 +67,7 @@ export function ProductCard({ product }: Props) {
             : "bg-zinc-900 hover:bg-zinc-800",
         ].join(" ")}
         onClick={async (e) => {
+          if (!hydrated) return;
           e.preventDefault();
 
           if (owned) return;
@@ -90,7 +93,13 @@ export function ProductCard({ product }: Props) {
           else alert("이미 장바구니에 담긴 상품입니다.");
         }}
       >
-        {owned ? "보유중" : isInCart ? "이미 담김" : "장바구니 담기"}
+        {!hydrated
+          ? "Loading..."
+          : owned
+            ? "보유중"
+            : isInCart
+              ? "이미 담김"
+              : "장바구니 담기"}
       </button>
     </div>
   );

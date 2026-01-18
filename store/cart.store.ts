@@ -21,6 +21,8 @@ type CartState = {
    */
   selectedIds: string[];
 
+  hydrated: boolean;
+
   // actions ------------------------------------------------------------
   addItem: (item: CartItem) => boolean;
   removeItem: (id: string) => void;
@@ -29,6 +31,11 @@ type CartState = {
   selectAll: () => void;
   clearSelection: () => void;
   removeSelected: () => void;
+  /**
+   * DB 에서 유지 상태 (cash / ownedIds) 를 로드해서
+   * store 에 주입 완료되었는지 표시
+   */
+  setHydrated: (v: boolean) => void;
 
   /**
    * 보유 중 (구매 완료) 상품 id 목록
@@ -75,6 +82,7 @@ export const useCartStore = create<CartState>((set, get) => ({
   selectedIds: [],
   ownedIds: [],
   cash: 10_000,
+  hydrated: false,
 
   addItem: (item) => {
     /**
@@ -196,10 +204,12 @@ export const useCartStore = create<CartState>((set, get) => ({
       ...state,
       cash,
       ownedIds,
+      hydrated: true,
     }));
   },
   setCash: (cash) => {
     if (!Number.isFinite(cash) || cash < 0) return;
     set((state) => ({ ...state, cash }));
   },
+  setHydrated: (v) => set((state) => ({ ...state, hydrated: v })),
 }));
