@@ -217,15 +217,27 @@ export default function CartClient() {
               //   return;
               // }
 
-              // DB 결제 먼저
-              const result = await checkoutSelected({
-                productIds: selectedIds,
-                totalPrice: selectedTotal,
+              // const result = await checkoutSelected({
+              //   productIds: selectedIds,
+              //   totalPrice: selectedTotal,
+              // });
+
+              // if (!result.ok) {
+              //   alert(result.message);
+
+              //   return;
+              // }
+
+              const res = await fetch("/api/checkout", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ productIds: selectedIds }),
               });
 
-              if (!result.ok) {
-                alert(result.message);
+              const json = await res.json().catch(() => null);
 
+              if (!res.ok) {
+                alert(json?.message ?? "결제에 실패했습니다.");
                 return;
               }
 
@@ -235,9 +247,9 @@ export default function CartClient() {
                * - DB 에서 결제가 성공했음
                * - store 도 같은 결과가 되도록 반영한다
                */
+              setCash(json.newCash);
               addOwned(selectedIds);
               removeSelected();
-              setCash(result.newCash);
 
               alert("구매가 완료되었습니다!");
             }}
