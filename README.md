@@ -9,18 +9,25 @@
 - **2페이지부터는 CSR로 무한 스크롤** (React Query `useInfiniteQuery`)
 - Supabase를 활용한 **데이터 모델링 / 쿼리 / API 라우트**
 - 재사용 가능한 컴포넌트 설계 + 타입 안정성(TypeScript)
-- Zustand로 장바구니 상태 관리(중복 담기 방지/선택 삭제 등)
+- Zustand로 장바구니 상태 관리 (중복 담기 방지/선택 삭제 등)
+- 클라이언트 상태(Zustand)와 **DB(Source of Truth)** 의 역할 분리
+- 인증 / 인가(Auth + RLS)를 고려한 **안전한 데이터 접근**
+- 결제 로직을 **클라이언트 → 서버 → DB** 단계로 승격하며 설계 경험하기
+- hydration 이슈 및 UX 깜빡임을 bootstrap + skeleton UI로 해결
 
 ---
 
 ## 🧱 기술 스택
 
-- Next.js (App Router)
-- TypeScript
-- TailwindCSS
-- Zustand (Client State)
-- TanStack React Query (Infinite Scroll)
-- Supabase (DB + SSR Query)
+- **Framework**: Next.js (App Router)
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS
+- **State Management**: Zustand
+- **Data / Auth**: Supabase
+- **Server Logic**: Route Handler + Supabase RPC
+- **Data Fetching**:
+  - SSR: Server Component
+  - CSR 확장: React Query (Infinite Scroll)
 
 ---
 
@@ -69,6 +76,52 @@
 - 체크박스 기반 선택 로직(전체선택/전체해제/선택삭제/전체삭제)
 
 ---
+## 🧠 Architecture Overview
+### 1️⃣ Rendering Strategy (SSR + CSR)
+
+- 첫 페이지 상품 리스트는 **Server Component에서 SSR**
+- 이후 스크롤 확장은 **Client Component + CSR**
+- 새로고침 시에도 일관된 UI를 유지하기 위해
+  - DB → Zustand 초기화 흐름을 별도로 설계
+
+---
+
+### 2️⃣ Authentication & Authorization
+
+- 인증: Supabase Auth
+- 인가: Supabase Row Level Security (RLS)
+
+모든 사용자 데이터는
+- **DB에서 auth.uid() 기준으로 접근 제어**
+- 클라이언트에서 임의 조작 불가능하도록 설계
+
+---
+### 3️⃣ State Strategy
+
+| 구분 | 저장 위치 | 이유 |
+|----|----|----|
+| 보유 캐시 | DB | Source of Truth |
+| 보유 상품(Owned) | DB | 새로고침/보안 |
+| 장바구니 | Zustand (메모리) | UX 중심 |
+| UI 상태 | Zustand | 즉각 반응 |
+---
+
+### 4️⃣ Checkout Flow (중요)
+
+결제는 **클라이언트가 아닌 서버에서 최종 판단**합니다.
+
+1. 클라이언트 → `/api/checkout` 요청 (productIds만 전달)
+2. 서버 → Supabase RPC 호출
+3. DB 함수에서
+   - 중복 구매 체크
+   - 가격 계산
+   - 캐시 확인
+   - 소유 등록 + 캐시 차감
+4. 결과만 클라이언트로 반환
+
+> 결제 로직을 DB 내부로 묶어 **부분 성공 위험을 최소화**했습니다.
+
+---
 
 ## 🧩 데이터 설계 (요약)
 
@@ -83,6 +136,14 @@
 - `image_path` (DB에는 경로만, 실제 파일은 public)
 
 > 가격 컬럼은 `original_price + discount_rate` 저장 → 화면에서 salePrice 계산
+
+### user_profiles
+- id (auth.users.id FK)
+- cash
+
+### user_owned_products
+- user_id
+- product_id
 
 ---
 
