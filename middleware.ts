@@ -12,11 +12,11 @@ export async function middleware(req: NextRequest) {
 
   const { pathname } = req.nextUrl;
 
-  // 보호할 경로 : /cart
+  // 보호할 경로 : /cart, /me
+  const isProtectedRoute =
+    pathname.startsWith("/cart") || pathname.startsWith("/me");
 
-  const isCartRoute = pathname.startsWith("/cart");
-
-  if (isCartRoute && !user) {
+  if (isProtectedRoute && !user) {
     const loginUrl = req.nextUrl.clone();
     loginUrl.pathname = "/login";
 
@@ -34,5 +34,5 @@ export async function middleware(req: NextRequest) {
  */
 
 export const config = {
-  matcher: ["/cart/:path*"],
+  matcher: ["/cart/:path*", "/me/:path*"],
 };
